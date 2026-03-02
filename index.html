@@ -1,113 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>gDversary.offsec | AUTH</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aDversary.offsec | SECURE_AUTH</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     <style>
-        :root { --neon-red: #ff1a1a; --dk-bg: #000000; }
-        body { background-color: var(--dk-bg); font-family: 'JetBrains Mono', monospace; color: white; overflow: hidden; }
-        .scanline { width: 100%; height: 3px; background: rgba(255,0,0,0.1); position: absolute; top: 0; z-index: 10; animation: scan 3s linear infinite; }
-        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
-        .cert-card { border: 1px solid #440000; background: linear-gradient(135deg, #0c0c0c, #150000); box-shadow: 0 0 50px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
-        .hologram { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(135deg, transparent 45%, rgba(255,0,0,0.15) 50%, transparent 55%); pointer-events: none; }
-        .logo-img { filter: drop-shadow(0 0 8px rgba(255,0,0,0.8)); max-width: 80px; }
-        .glitch { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        body { background: #000; font-family: monospace; color: #f00; overflow: hidden; }
+        .cert-card { border: 1px solid #500; background: #080808; position: relative; display: none; }
+        .logo { filter: drop-shadow(0 0 5px red); width: 60px; }
+        #err { display: none; color: #f00; text-align: center; margin-top: 20%; font-weight: bold; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
-    <div class="scanline"></div>
+    <div id="loading">AUTHENTICATING_TOKEN...</div>
+    <div id="err text-sm">CRITICAL: INTEGRITY_VIOLATION</div>
 
-    <div id="auth-screen" class="text-center">
-        <p class="text-red-700 animate-pulse text-[10px] tracking-[0.5em] mb-4">DECRYPTING PROTOCOL...</p>
-        <div class="w-48 h-0.5 bg-zinc-900 mx-auto overflow-hidden">
-            <div class="w-full h-full bg-red-700 animate-[loading_2s_infinite_linear]"></div>
+    <div id="cert" class="cert-card p-10 max-w-sm w-full border-red-900 shadow-2xl">
+        <div class="flex justify-between items-start mb-8">
+            <span class="text-[8px] opacity-50 uppercase">Access: <span id="r-type"></span></span>
+            <img src="img/logo.png" class="logo" alt="aDversary_Logo">
         </div>
-    </div>
-
-    <div id="cert-container" class="hidden max-w-sm w-full p-4">
-        <div class="cert-card p-10 rounded-sm relative" id="card">
-            <div class="hologram" id="hologram"></div>
-            
-            <div class="flex justify-between items-start mb-10">
-                <div class="text-[9px] text-red-800 font-bold uppercase">gDversary Ops<br>Authorized Personnel</div>
-                <img src="https://i.ibb.co/L6V7K99/logo-adversary.png" class="logo-img" alt="Logo">
-            </div>
-
-            <div class="mb-8">
-                <h1 class="text-4xl font-black text-red-600 mb-1 glitch" id="role-tag">--</h1>
-                <div class="h-0.5 bg-red-950 w-20"></div>
-            </div>
-
-            <div class="space-y-6">
-                <div>
-                    <p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-1">Authenticated Subject</p>
-                    <p class="text-xl font-bold uppercase text-zinc-100" id="real-name">--</p>
-                </div>
-                <div>
-                    <p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-1">Callsign</p>
-                    <p class="text-lg font-bold text-red-700" id="aka-name">--</p>
-                </div>
-            </div>
-
-            <div class="mt-16 flex justify-between items-end border-t border-zinc-900 pt-4">
-                <div class="text-[9px] text-zinc-700">
-                    ID_REF: <span class="text-zinc-500" id="serial-num">--</span>
-                </div>
-                <div class="text-[10px] text-red-900 font-black italic">ORIGIN_V2</div>
-            </div>
+        <h1 class="text-3xl font-black mb-6 tracking-tighter" id="role-display">--</h1>
+        <div class="space-y-4">
+            <div><p class="text-[8px] text-zinc-600 uppercase">Subject</p><p id="n" class="text-lg text-white font-bold"></p></div>
+            <div><p class="text-[8px] text-zinc-600 uppercase">Callsign</p><p id="a" class="text-red-600"></p></div>
+        </div>
+        <div class="mt-10 pt-4 border-t border-zinc-900 text-[8px] text-zinc-700 flex justify-between">
+            <span id="s"></span><span>v2.0_STABLE</span>
         </div>
     </div>
 
     <script>
-        // Ofuscación de datos para evitar lectura fácil en HTML
-        const _DATA = {
-            "001": "Rk9VTkRFUjpBbGVqYW5kcm8gR29uemFsZXo6QWxleDowMDEvMDA5",
-            "002": "Rk9VTkRFUjpNaWd1ZWwgQW5nZWwgQWJhZDp0aGVtaWs6MDAyLzAwOQ==",
-            "003": "Rk9VTkRFUjpKb3NlIE1hbnVlbCBOdcOxZXo6ZWxoYWNrZXJldGljbDowMDMvMDA5",
-            "004": "Rk9VTkRFUjpNZXJjZWRlcyBNdcHDoW96Ok06MDA0LzAwOQ==",
-            "005": "Rk9VTkRFUjpJc2lzIEFsYmlvbDp2M3JkdXI0czowMDUvMDA5",
-            "006": "Rk9VTkRFUjpYdXFpYW5nIGxpdS14dTpFbGFkeTowMDYvMDA5",
-            "007": "TUVNQkVSOkJlYXRyaXogRnJlc25vOkNWRWE6MDA3LzAwOQ==",
-            "008": "TUVNQkVSOlJhcXVlbCBHYWx2ZXo6RGVhZHBvb2w6MDA4LzAwOQ==",
-            "009": "TUVNQkVSOkZhYmlhbiBEZWxnYWRvOkVsQmVjYXJpbzowMDkvMDA5"
+        // Mapping ofuscado y salts de seguridad
+        const _0x = {
+            "001": ["Rk9VTkRFUg==","QWxlamFuZHJvIEdvbnphbGV6","QWxleA==","MDAxLzAwOQ==","e9671d18f"],
+            "002": ["Rk9VTkRFUg==","TWlndWVsIEFuZ2VsIEFiYWQ=","dGhlbWlr","MDAyLzAwOQ==","f1a2b3c4d"],
+            "003": ["Rk9VTkRFUg==","Sm9zZSBNYW51ZWwgTnXDsWV6","ZWxoYWNrZXJldGljbw==","MDAzLzAwOQ==","a8b9c0d1e"],
+            "004": ["Rk9VTkRFUg==","TWVyY2VkZXMgTXXDsW96","TQ==","MDA0LzAwOQ==","b2c3d4e5f"],
+            "005": ["Rk9VTkRFUg==","SXNpcyBBbGJpb2w=","djNyZHVyNHM=","MDA1LzAwOQ==","c3d4e5f6a"],
+            "006": ["Rk9VTkRFUg==","WHVxaWFuZyBsaXUteHU=","RWxhZHk=","MDA2LzAwOQ==","d0e5f6a7b"],
+            "007": ["TUVNQkVS","QmVhdHJpeiBGcmVzbm8=","Q1ZFYQ==","MDA3LzAwOQ==","e5f6a7b8c"],
+            "008": ["TUVNQkVS","UmFxdWVsIEdhbHZleA==","RGVhZHBvb2w=","MDA4LzAwOQ==","f6a7b8c9d"],
+            "009": ["TUVNQkVS","RmFiaWFuIERlbGdhZG8=","RWxCZWNhcmlv","MDA5LzAwOQ==","a7b8c9d0e"]
         };
 
         window.onload = () => {
-            const params = new URLSearchParams(window.location.search);
-            const id = params.get('id');
-            const sig = params.get('sig'); // Token de seguridad
-
-            // Simulación de verificación de seguridad
+            const p = new URLSearchParams(window.location.search);
+            const i = p.get('id'), s = p.get('sig');
+            
             setTimeout(() => {
-                if (_DATA[id]) {
-                    // Si hay ID pero no hay firma válida, podrías bloquearlo. 
-                    // Para este prototipo, validamos que el ID existe.
-                    const decoded = atob(_DATA[id]).split(':');
-                    
-                    document.getElementById('role-tag').innerText = decoded[0];
-                    document.getElementById('real-name').innerText = decoded[1];
-                    document.getElementById('aka-name').innerText = `[ ${decoded[2]} ]`;
-                    document.getElementById('serial-num').innerText = decoded[3];
-
-                    document.getElementById('auth-screen').style.display = 'none';
-                    document.getElementById('cert-container').classList.remove('hidden');
+                document.getElementById('loading').style.display='none';
+                if(_0x[i] && _0x[i][4] === s) {
+                    const d = _0x[i];
+                    document.getElementById('role-display').innerText = atob(d[0]);
+                    document.getElementById('n').innerText = atob(d[1]);
+                    document.getElementById('a').innerText = `[ ${atob(d[2])} ]`;
+                    document.getElementById('s').innerText = `REF: ${d[3]}`;
+                    document.getElementById('cert').style.display = 'block';
                 } else {
-                    document.getElementById('auth-screen').innerHTML = "<p class='text-red-600 font-bold'>ERROR: ACCESS_DENIED<br><span class='text-[8px]'>INVALID_CREDENTIALS</span></p>";
+                    document.body.innerHTML = "<div style='color:red; font-family:monospace; padding:20px;'>ACCESS_DENIED: NO_VALID_TOKEN_PRESENT</div>";
                 }
-            }, 2000);
+            }, 1500);
         };
-
-        // Efecto visual de movimiento
-        window.addEventListener('mousemove', (e) => {
-            const x = (e.clientX / window.innerWidth) * 100;
-            const y = (e.clientY / window.innerHeight) * 100;
-            document.getElementById('hologram').style.transform = `translate(${x/10}%, ${y/10}%)`;
-            document.getElementById('card').style.transform = `perspective(1000px) rotateY(${(x-50)/20}deg) rotateX(${(50-y)/20}deg)`;
-        });
     </script>
 </body>
 </html>
