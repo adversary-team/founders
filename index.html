@@ -1,5 +1,113 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>gDversary.offsec | AUTH</title><script src="https://cdn.tailwindcss.com"></script><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet"><script src="https://unpkg.com/tweetnacl@1.0.3/nacl-fast.min.js"></script><style>
-:root{--neon-red:#ff1a1a;--dk-bg:#000000}body{background-color:var(--dk-bg);font-family:'JetBrains Mono',monospace;color:white;overflow:hidden;touch-action:none}.scanline{width:100%;height:3px;background:rgba(255,0,0,0.1);position:absolute;top:0;z-index:10;animation:scan 3s linear infinite}@keyframes scan{0%{top:0%}100%{top:100%}}.cert-card{border:1px solid #440000;background:linear-gradient(135deg,#0c0c0c,#150000);box-shadow:0 0 50px rgba(0,0,0,0.8);position:relative;overflow:hidden;cursor:pointer;backface-visibility:hidden}.hologram{position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(135deg,transparent 45%,rgba(255,0,0,0.1) 50%,transparent 55%);pointer-events:none;filter:blur(2px)}.glitch{animation:glitch 1s infinite alternate}.logo-red{filter:hue-rotate(-15deg) saturate(1.5) drop-shadow(0 0 10px rgba(255,0,0,0.6));width:3rem}.status-ok{background:#ff0000;width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;box-shadow:0 0 5px var(--neon-red)}</style></head><body class="flex items-center justify-center min-h-screen p-4"><div class="scanline"></div><div id="auth-screen" class="text-center"><p class="text-red-800 animate-pulse text-[11px] tracking-[0.4em] mb-4">gDversary_Ops ENGINE STARTING...</p><div class="w-48 h-0.5 bg-zinc-900 mx-auto overflow-hidden"><div class="w-full h-full bg-red-700 animate-[loading_1s_infinite_linear]"></div></div></div><div id="cert-container" class="hidden max-w-sm w-full"><div class="cert-card p-10 rounded-sm relative" id="card"><div class="hologram" id="hologram"></div><div class="flex justify-between items-start mb-12"><div class="text-[9px] text-red-700 font-bold uppercase tracking-tight leading-none">Offensive Security Operations</div><img src="https://g-adversary.site/wp-content/uploads/2021/04/logo-adversary.png" class="logo-red"></div><div class="mb-10"><h1 class="text-4xl font-extrabold text-red-600 mb-1 glitch tracking-tighter" id="role-tag">FOUNDER</h1><div class="h-0.5 bg-red-950 w-24"></div></div><div class="space-y-8"><div><p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-2">Authenticated Identity</p><p class="text-xl font-bold uppercase tracking-tight text-zinc-200" id="real-name"></p></div><div><p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-2">Callsign</p><p class="text-lg font-bold text-red-700" id="aka-name"></p></div></div><div class="mt-20 flex justify-between items-end border-t border-zinc-900 pt-5"><div class="text-[9px] text-zinc-700"><p>CERT_NO. <span class="font-bold text-zinc-500" id="serial-num"></span></p><p>SEC_STATUS: <span class="status-ok"></span><span class="text-red-500">VERIFIED</span></p></div><div class="text-[10px] text-zinc-900 italic font-black">gDversary_Core_V2</div></div></div></div><script>
-window.addEventListener('load',function(){const params=new URLSearchParams(window.location.search);const id=params.get('id');const msg=params.get('m');const sig=params.get('sig');const publicKey=nacl.util.decodeBase64('a01b7a2167d565022f293ac2b5d4e19b02a77f3a8b668d99c43d8a8b11a5e1e1');const card=document.getElementById('card');const holo=document.getElementById('hologram');const authScreen=document.getElementById('auth-screen');const certContainer=document.getElementById('cert-container');const verify=function(){try{if(!id||!msg||!sig)return false;const msgData=nacl.util.decodeBase64(msg);const sigData=nacl.util.decodeBase64(sig);return nacl.sign.detached.verify(msgData,sigData,publicKey)}catch(e){return false}}();if(verify){const raw=nacl.util.decodeUTF8(nacl.util.decodeBase64(msg)).split(':');document.getElementById('role-tag').innerText=raw[0];document.getElementById('real-name').innerText=raw[1];document.getElementById('aka-name').innerText=`[ ${raw[2]} ]`;document.getElementById('serial-num').innerText=raw[3];setTimeout(function(){authScreen.style.display='none';certContainer.classList.remove('hidden')},1800)}else{document.body.innerHTML="<div class='text-red-700 font-bold text-[11px] p-5'>CRITICAL_SECURITY_ERROR: INTEGRITY_CHECK_FAILED. TOKEN INVALID.</div>"}})
-</script></body></html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gDversary.offsec | AUTH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon-red: #ff1a1a; --dk-bg: #000000; }
+        body { background-color: var(--dk-bg); font-family: 'JetBrains Mono', monospace; color: white; overflow: hidden; }
+        .scanline { width: 100%; height: 3px; background: rgba(255,0,0,0.1); position: absolute; top: 0; z-index: 10; animation: scan 3s linear infinite; }
+        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+        .cert-card { border: 1px solid #440000; background: linear-gradient(135deg, #0c0c0c, #150000); box-shadow: 0 0 50px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
+        .hologram { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(135deg, transparent 45%, rgba(255,0,0,0.15) 50%, transparent 55%); pointer-events: none; }
+        .logo-img { filter: drop-shadow(0 0 8px rgba(255,0,0,0.8)); max-width: 80px; }
+        .glitch { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="scanline"></div>
+
+    <div id="auth-screen" class="text-center">
+        <p class="text-red-700 animate-pulse text-[10px] tracking-[0.5em] mb-4">DECRYPTING PROTOCOL...</p>
+        <div class="w-48 h-0.5 bg-zinc-900 mx-auto overflow-hidden">
+            <div class="w-full h-full bg-red-700 animate-[loading_2s_infinite_linear]"></div>
+        </div>
+    </div>
+
+    <div id="cert-container" class="hidden max-w-sm w-full p-4">
+        <div class="cert-card p-10 rounded-sm relative" id="card">
+            <div class="hologram" id="hologram"></div>
+            
+            <div class="flex justify-between items-start mb-10">
+                <div class="text-[9px] text-red-800 font-bold uppercase">gDversary Ops<br>Authorized Personnel</div>
+                <img src="https://i.ibb.co/L6V7K99/logo-adversary.png" class="logo-img" alt="Logo">
+            </div>
+
+            <div class="mb-8">
+                <h1 class="text-4xl font-black text-red-600 mb-1 glitch" id="role-tag">--</h1>
+                <div class="h-0.5 bg-red-950 w-20"></div>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-1">Authenticated Subject</p>
+                    <p class="text-xl font-bold uppercase text-zinc-100" id="real-name">--</p>
+                </div>
+                <div>
+                    <p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-1">Callsign</p>
+                    <p class="text-lg font-bold text-red-700" id="aka-name">--</p>
+                </div>
+            </div>
+
+            <div class="mt-16 flex justify-between items-end border-t border-zinc-900 pt-4">
+                <div class="text-[9px] text-zinc-700">
+                    ID_REF: <span class="text-zinc-500" id="serial-num">--</span>
+                </div>
+                <div class="text-[10px] text-red-900 font-black italic">ORIGIN_V2</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Ofuscación de datos para evitar lectura fácil en HTML
+        const _DATA = {
+            "001": "Rk9VTkRFUjpBbGVqYW5kcm8gR29uemFsZXo6QWxleDowMDEvMDA5",
+            "002": "Rk9VTkRFUjpNaWd1ZWwgQW5nZWwgQWJhZDp0aGVtaWs6MDAyLzAwOQ==",
+            "003": "Rk9VTkRFUjpKb3NlIE1hbnVlbCBOdcOxZXo6ZWxoYWNrZXJldGljbDowMDMvMDA5",
+            "004": "Rk9VTkRFUjpNZXJjZWRlcyBNdcHDoW96Ok06MDA0LzAwOQ==",
+            "005": "Rk9VTkRFUjpJc2lzIEFsYmlvbDp2M3JkdXI0czowMDUvMDA5",
+            "006": "Rk9VTkRFUjpYdXFpYW5nIGxpdS14dTpFbGFkeTowMDYvMDA5",
+            "007": "TUVNQkVSOkJlYXRyaXogRnJlc25vOkNWRWE6MDA3LzAwOQ==",
+            "008": "TUVNQkVSOlJhcXVlbCBHYWx2ZXo6RGVhZHBvb2w6MDA4LzAwOQ==",
+            "009": "TUVNQkVSOkZhYmlhbiBEZWxnYWRvOkVsQmVjYXJpbzowMDkvMDA5"
+        };
+
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const sig = params.get('sig'); // Token de seguridad
+
+            // Simulación de verificación de seguridad
+            setTimeout(() => {
+                if (_DATA[id]) {
+                    // Si hay ID pero no hay firma válida, podrías bloquearlo. 
+                    // Para este prototipo, validamos que el ID existe.
+                    const decoded = atob(_DATA[id]).split(':');
+                    
+                    document.getElementById('role-tag').innerText = decoded[0];
+                    document.getElementById('real-name').innerText = decoded[1];
+                    document.getElementById('aka-name').innerText = `[ ${decoded[2]} ]`;
+                    document.getElementById('serial-num').innerText = decoded[3];
+
+                    document.getElementById('auth-screen').style.display = 'none';
+                    document.getElementById('cert-container').classList.remove('hidden');
+                } else {
+                    document.getElementById('auth-screen').innerHTML = "<p class='text-red-600 font-bold'>ERROR: ACCESS_DENIED<br><span class='text-[8px]'>INVALID_CREDENTIALS</span></p>";
+                }
+            }, 2000);
+        };
+
+        // Efecto visual de movimiento
+        window.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth) * 100;
+            const y = (e.clientY / window.innerHeight) * 100;
+            document.getElementById('hologram').style.transform = `translate(${x/10}%, ${y/10}%)`;
+            document.getElementById('card').style.transform = `perspective(1000px) rotateY(${(x-50)/20}deg) rotateX(${(50-y)/20}deg)`;
+        });
+    </script>
+</body>
+</html>
