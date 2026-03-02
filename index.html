@@ -1,38 +1,58 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>aDversary.offsec | SECURE_AUTH</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gDversary.offsec | SECURE_AUTH</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; font-family: monospace; color: #f00; overflow: hidden; }
-        .cert-card { border: 1px solid #500; background: #080808; position: relative; display: none; }
-        .logo { filter: drop-shadow(0 0 5px red); width: 60px; }
-        #err { display: none; color: #f00; text-align: center; margin-top: 20%; font-weight: bold; }
+        body { background: #000; font-family: 'JetBrains Mono', monospace; color: #f00; overflow: hidden; }
+        .cert-card { border: 1px solid #400; background: linear-gradient(145deg, #050505, #100000); position: relative; display: none; box-shadow: 0 0 40px rgba(255,0,0,0.2); }
+        .logo-container { filter: drop-shadow(0 0 10px rgba(255,0,0,0.7)); width: 70px; height: 70px; object-fit: contain; }
+        #loading { letter-spacing: 0.5em; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
-    <div id="loading">AUTHENTICATING_TOKEN...</div>
-    <div id="err text-sm">CRITICAL: INTEGRITY_VIOLATION</div>
 
-    <div id="cert" class="cert-card p-10 max-w-sm w-full border-red-900 shadow-2xl">
-        <div class="flex justify-between items-start mb-8">
-            <span class="text-[8px] opacity-50 uppercase">Access: <span id="r-type"></span></span>
-            <img src="img/2026-03-02_14-02.png" class="logo" alt="aDversary_Logo">
+    <div id="loading" class="text-[10px] text-red-800 font-bold">VERIFYING_INTEGRITY...</div>
+
+    <div id="cert" class="cert-card p-10 max-w-sm w-full rounded-sm">
+        <div style="position:absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, transparent 45%, rgba(255,0,0,0.05) 50%, transparent 55%); pointer-events:none;"></div>
+        
+        <div class="flex justify-between items-start mb-10 relative z-10">
+            <div class="text-[8px] text-red-900 font-black leading-tight uppercase">
+                Adversary Operations<br>Unit: Founders_Gen_1
+            </div>
+            <img src="img/2026-03-02_14-02.png" class="logo-container" onerror="this.src='https://i.ibb.co/L6V7K99/logo-adversary.png'">
         </div>
-        <h1 class="text-3xl font-black mb-6 tracking-tighter" id="role-display">--</h1>
-        <div class="space-y-4">
-            <div><p class="text-[8px] text-zinc-600 uppercase">Subject</p><p id="n" class="text-lg text-white font-bold"></p></div>
-            <div><p class="text-[8px] text-zinc-600 uppercase">Callsign</p><p id="a" class="text-red-600"></p></div>
+
+        <div class="relative z-10">
+            <h1 class="text-4xl font-black text-red-600 mb-2 tracking-tighter italic" id="role-display">--</h1>
+            <div class="h-0.5 bg-red-900 w-16 mb-8"></div>
+
+            <div class="space-y-6">
+                <div>
+                    <p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-1">Authenticated Subject</p>
+                    <p id="n" class="text-xl text-zinc-200 font-bold uppercase tracking-tight"></p>
+                </div>
+                <div>
+                    <p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-1">Operative Callsign</p>
+                    <p id="a" class="text-lg text-red-700 font-bold"></p>
+                </div>
+            </div>
         </div>
-        <div class="mt-10 pt-4 border-t border-zinc-900 text-[8px] text-zinc-700 flex justify-between">
-            <span id="s"></span><span>v2.0_STABLE</span>
+
+        <div class="mt-16 pt-4 border-t border-zinc-900 text-[8px] text-zinc-800 flex justify-between relative z-10 font-bold">
+            <span id="s"></span>
+            <span>SEC_CLEARANCE: LVL_7</span>
         </div>
     </div>
 
     <script>
-        // Mapping ofuscado y salts de seguridad
-        const _0x = {
+        // DATA REGISTRY (Ofuscado y con Tokens de validación)
+        // Estructura: [Rango, Nombre, Alias, Serial, Token_Privado]
+        const _CORE = {
             "001": ["Rk9VTkRFUg==","QWxlamFuZHJvIEdvbnphbGV6","QWxleA==","MDAxLzAwOQ==","e9671d18f"],
             "002": ["Rk9VTkRFUg==","TWlndWVsIEFuZ2VsIEFiYWQ=","dGhlbWlr","MDAyLzAwOQ==","f1a2b3c4d"],
             "003": ["Rk9VTkRFUg==","Sm9zZSBNYW51ZWwgTnXDsWV6","ZWxoYWNrZXJldGljbw==","MDAzLzAwOQ==","a8b9c0d1e"],
@@ -45,22 +65,25 @@
         };
 
         window.onload = () => {
-            const p = new URLSearchParams(window.location.search);
-            const i = p.get('id'), s = p.get('sig');
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const sig = params.get('sig');
             
             setTimeout(() => {
                 document.getElementById('loading').style.display='none';
-                if(_0x[i] && _0x[i][4] === s) {
-                    const d = _0x[i];
+                
+                // VALIDACIÓN CRÍTICA: El sig debe coincidir con el token interno del ID
+                if(_CORE[id] && _CORE[id][4] === sig) {
+                    const d = _CORE[id];
                     document.getElementById('role-display').innerText = atob(d[0]);
                     document.getElementById('n').innerText = atob(d[1]);
                     document.getElementById('a').innerText = `[ ${atob(d[2])} ]`;
-                    document.getElementById('s').innerText = `REF: ${d[3]}`;
+                    document.getElementById('s').innerText = `SN: ${d[3]}`;
                     document.getElementById('cert').style.display = 'block';
                 } else {
-                    document.body.innerHTML = "<div style='color:red; font-family:monospace; padding:20px;'>ACCESS_DENIED: NO_VALID_TOKEN_PRESENT</div>";
+                    document.body.innerHTML = "<div class='text-red-600 text-[10px] font-bold tracking-tighter p-10'>CRITICAL_AUTH_FAILURE: DATA_TAMPERING_DETECTED<br>REPORTING_TO_CORE_OPERATIONS...</div>";
                 }
-            }, 1500);
+            }, 1800);
         };
     </script>
 </body>
