@@ -6,10 +6,16 @@
     <title>aDversary.offsec | SECURE_AUTH</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root {
+            --gold-metal: #d4af37;
+            --bright-white: #ffffff;
+            --neon-red: #ff0000;
+        }
+
         body { background: #000; font-family: 'JetBrains Mono', monospace; color: #f00; overflow: hidden; touch-action: none; }
         
         /* Efecto de Escaneo de Línea */
-        .scanline { width: 100%; height: 3px; background: rgba(255,0,0,0.1); position: absolute; top: 0; z-index: 10; animation: scan 3s linear infinite; }
+        .scanline { width: 100%; height: 3px; background: rgba(255,0,0,0.1); position: absolute; top: 0; z-index: 10; animation: scan 3s linear infinite; pointer-events: none; }
         @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
 
         /* Contenedor principal para la perspectiva 3D */
@@ -21,25 +27,39 @@
             background: linear-gradient(145deg, #050505, #100000); 
             position: relative; 
             display: none; 
-            box-shadow: 0 0 50px rgba(0,0,0,0.8); 
-            transition: transform 0.1s ease-out; /* Suavizar el movimiento */
+            box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(212, 175, 55, 0.05); 
+            transition: transform 0.1s ease-out;
             transform-style: preserve-3d;
         }
 
-        /* Brillo Holográfico Dinámico ( Glossy Effect ) */
+        /* Brillo Holográfico Dinámico con destellos dorados */
         .hologram-shine { 
             position: absolute; 
             top: 0; left: 0; width: 100%; height: 100%; 
-            background: linear-gradient(135deg, transparent 40%, rgba(255,0,0,0.1) 50%, transparent 60%); 
+            background: linear-gradient(135deg, transparent 40%, rgba(212, 175, 55, 0.08) 48%, rgba(255, 0, 0, 0.12) 50%, rgba(212, 175, 55, 0.08) 52%, transparent 60%); 
             pointer-events: none; 
-            transition: background-position 0.1s ease-out; /* Movimiento suave del brillo */
+            transition: background-position 0.1s ease-out;
             background-size: 200% 200%;
             background-position: 0% 0%;
+            z-index: 5;
+        }
+
+        /* Tipografías Elite */
+        .label-gold {
+            color: var(--gold-metal);
+            text-shadow: 0 0 5px rgba(212, 175, 55, 0.4);
+            font-weight: 700;
+            letter-spacing: 0.15em;
+        }
+
+        .data-white {
+            color: var(--bright-white);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
         }
 
         .logo-container { filter: drop-shadow(0 0 10px rgba(255,0,0,0.8)); width: 75px; height: 75px; object-fit: contain; }
         .glitch { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -53,7 +73,8 @@
             
             <div class="flex justify-between items-start mb-10 relative z-10">
                 <div class="text-[8px] text-red-800 font-black leading-tight uppercase">
-                    Adversary Operations<br>Unit: Founders_Gen_1
+                    Adversary Operations<br>
+                    <span class="label-gold" style="font-size: 7px;">Clearance: Founder_Gen_1</span>
                 </div>
                 <img src="img/logo.png" class="logo-container" id="logo-main" alt="Logo">
             </div>
@@ -64,39 +85,37 @@
 
                 <div class="space-y-8">
                     <div>
-                        <p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-1">Authenticated Subject</p>
-                        <p id="n" class="text-xl text-zinc-100 font-bold uppercase tracking-tight"></p>
+                        <p class="text-[8px] label-gold uppercase mb-1">Authenticated Subject</p>
+                        <p id="n" class="text-xl data-white font-bold uppercase tracking-tight"></p>
                     </div>
                     <div>
-                        <p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-1">Operative Callsign</p>
-                        <p id="a" class="text-lg text-red-700 font-bold"></p>
+                        <p class="text-[8px] label-gold uppercase mb-1">Operative Callsign</p>
+                        <p id="a" class="text-lg text-red-700 font-bold tracking-wide"></p>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-20 pt-4 border-t border-zinc-900 text-[8px] text-zinc-800 flex justify-between relative z-10 font-bold">
-                <span id="s"></span>
-                <span>SEC_CLEARANCE: FOUNDER_LVL</span>
+            <div class="mt-20 pt-4 border-t border-zinc-900 text-[8px] flex justify-between relative z-10 font-bold">
+                <span id="s" class="text-zinc-600"></span>
+                <span class="label-gold">SEC_STATUS: VERIFIED</span>
             </div>
         </div>
     </div>
 
     <script>
-        // Decodificación UTF-8 nativa (ñ, tildes)
         function b64DecodeUnicode(str) {
             return decodeURIComponent(atob(str).split('').map(function(c) {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
         }
 
-        // Data Registry con Tokens de Integridad
         const _DB = {
             "001": ["Rk9VTkRFUg==","QWxlamFuZHJvIEdvbnphbGV6","QWxleA==","MDAxLzAwOQ==","e9671d18f"],
             "002": ["Rk9VTkRFUg==","TWlndWVsIMOBbmdlbCBBYmFk","dGhlbWlr","MDAyLzAwOQ==","f1a2b3c4d"],
             "003": ["Rk9VTkRFUg==","Sm9zw6kgTWFudWVsIE51w7Fleg==","ZWxoYWNrZXJldGljbw==","MDAzLzAwOQ==","a8b9c0d1e"],
             "004": ["Rk9VTkRFUg==","TWVyY2VkZXMgTXXDsW96","TQ==","MDA0LzAwOQ==","b2c3d4e5f"],
             "005": ["Rk9VTkRFUg==","SXNpcyBBbGJpb2w=","djNyZHVyNHM=","MDA1LzAwOQ==","c3d4e5f6a"],
-            "006": ["Rk9VTkRFUg==","WHVxaWFuZyBsaXUteHU=","RWxhZHk=","MDA6LzAwOQ==","d0e5f6a7b"],
+            "006": ["Rk9VTkRFUg==","WHVxaWFuZyBsaXUteHU=","RWxhZHk=","MDA2LzAwOQ==","d0e5f6a7b"],
             "007": ["TUVNQkVS","QmVhdHJpeiBGcmVzbm8=","Q1ZFYQ==","MDA3LzAwOQ==","e5f6a7b8c"],
             "008": ["TUVNQkVS","UmFxdWVsIEdhbHZleA==","RGVhZHBvb2w=","MDA4LzAwOQ==","f6a7b8c9d"],
             "009": ["TUVNQkVS","RmFiaWFuIERlbGdhZG8=","RWxCZWNhcmlv","MDA5LzAwOQ==","a7b8c9d0e"]
@@ -109,8 +128,6 @@
             
             setTimeout(() => {
                 document.getElementById('loading').style.display='none';
-                
-                // Validación estricta del token sig
                 if(_DB[id] && _DB[id][4] === sig) {
                     const data = _DB[id];
                     document.getElementById('role-display').innerText = b64DecodeUnicode(data[0]);
@@ -121,46 +138,30 @@
                     document.getElementById('cert-container').classList.remove('hidden');
                     document.getElementById('card').style.display = 'block';
                 } else {
-                    document.body.innerHTML = "<div class='p-10 text-red-600 font-bold text-[10px] tracking-widest'>ACCESS_DENIED: AUTH_TOKEN_MISMATCH<br><span class='text-[7px] text-zinc-800'>aDversary_Ops</span></div>";
+                    document.body.innerHTML = "<div class='p-10 text-red-600 font-bold text-[10px] tracking-widest uppercase'>AUTH_ERR: INTEGRITY_VIOLATION</div>";
                 }
             }, 1200);
         };
 
-        // --- MANEJADORES DE EFECTOS VISUALES (Movimiento y Brillo) ---
         const card = document.getElementById('card');
         const shine = document.getElementById('shine');
 
         const updateVisuals = (x, y) => {
-            // 1. Rotación 3D de la tarjeta (Perspectiva)
-            // Calculamos un valor entre -10 y 10 grados para X e Y
             const rotateX = (50 - y) / 10;
             const rotateY = (x - 50) / 10;
             card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-
-            // 2. Movimiento del brillo holográfico (Glossy Effect)
-            // Desplazamos la posición del gradiente en base al cursor
-            shine.style.backgroundPosition = `${x / 2}% ${y / 2}%`;
+            shine.style.backgroundPosition = `${x}% ${y}%`;
         };
 
-        // Evento para escritorio (Ratón)
         window.addEventListener('mousemove', (e) => {
-            // Obtenemos porcentaje del cursor en la ventana (0-100)
-            const x = (e.clientX / window.innerWidth) * 100;
-            const y = (e.clientY / window.innerHeight) * 100;
-            updateVisuals(x, y);
+            updateVisuals((e.clientX / window.innerWidth) * 100, (e.clientY / window.innerHeight) * 100);
         });
 
-        // Evento para móvil (Giroscopio/Acelerómetro)
-        window.addEventListener('deviceorientation', (e) => {
-            if (!e.gamma || !e.beta) return; // Evitar errores si no hay sensor
-
-            // gamma: inclinación izquierda/derecha (-90 a 90) -> Mapeamos a X (0 a 100)
-            // beta: inclinación adelante/atrás (-180 a 180) -> Mapeamos a Y (0 a 100)
-            const x = (e.gamma + 90) * (100 / 180);
-            const y = (e.beta + 90) * (100 / 180); // Rango simplificado
-            
-            updateVisuals(x, y);
-        });
+        // Soporte táctil para móvil (sin sensores de giroscopio para evitar pedir permisos)
+        window.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            updateVisuals((touch.clientX / window.innerWidth) * 100, (touch.clientY / window.innerHeight) * 100);
+        }, { passive: true });
     </script>
 </body>
 </html>
