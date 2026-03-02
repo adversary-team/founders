@@ -3,68 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>aDversary.offsec | SECURE_AUTH</title>
+    <title>gDversary.offsec | SECURE_AUTH</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; font-family: 'JetBrains Mono', monospace; color: #f00; overflow: hidden; }
-        .cert-card { border: 1px solid #400; background: linear-gradient(145deg, #050505, #100000); position: relative; display: none; box-shadow: 0 0 50px rgba(255,0,0,0.3); }
+        body { background: #000; font-family: 'JetBrains Mono', monospace; color: #f00; overflow: hidden; touch-action: none; }
+        
+        /* Efecto de Escaneo de Línea */
+        .scanline { width: 100%; height: 3px; background: rgba(255,0,0,0.1); position: absolute; top: 0; z-index: 10; animation: scan 3s linear infinite; }
+        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+
+        /* Contenedor principal para la perspectiva 3D */
+        #cert-container { perspective: 1000px; }
+
+        /* Tarjeta del Certificado */
+        .cert-card { 
+            border: 1px solid #400; 
+            background: linear-gradient(145deg, #050505, #100000); 
+            position: relative; 
+            display: none; 
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); 
+            transition: transform 0.1s ease-out; /* Suavizar el movimiento */
+            transform-style: preserve-3d;
+        }
+
+        /* Brillo Holográfico Dinámico ( Glossy Effect ) */
+        .hologram-shine { 
+            position: absolute; 
+            top: 0; left: 0; width: 100%; height: 100%; 
+            background: linear-gradient(135deg, transparent 40%, rgba(255,0,0,0.1) 50%, transparent 60%); 
+            pointer-events: none; 
+            transition: background-position 0.1s ease-out; /* Movimiento suave del brillo */
+            background-size: 200% 200%;
+            background-position: 0% 0%;
+        }
+
         .logo-container { filter: drop-shadow(0 0 10px rgba(255,0,0,0.8)); width: 75px; height: 75px; object-fit: contain; }
-        #loading { letter-spacing: 0.5em; animation: pulse 1.5s infinite; text-transform: uppercase; }
+        .glitch { animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
-        .hologram-effect { position:absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, transparent 40%, rgba(255,0,0,0.08) 50%, transparent 60%); pointer-events:none; }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="scanline"></div>
 
-    <div id="loading" class="text-[10px] text-red-700 font-bold">ANALYZING_HANDSHAKE...</div>
+    <div id="loading" class="text-[10px] text-red-700 font-bold uppercase tracking-[0.5em]">ANALYZING_HANDSHAKE...</div>
 
-    <div id="cert" class="cert-card p-10 max-w-sm w-full rounded-sm border-red-900">
-        <div class="hologram-effect"></div>
-        
-        <div class="flex justify-between items-start mb-10 relative z-10">
-            <div class="text-[8px] text-red-800 font-black leading-tight uppercase">
-                Adversary Operations<br>Unit: Founders_Gen_1
-            </div>
-            <img src="img/2026-03-02_14-02.png" class="logo-container" id="logo-main" alt="Logo">
-        </div>
-
-        <div class="relative z-10">
-            <h1 class="text-4xl font-black text-red-600 mb-1 tracking-tighter italic uppercase" id="role-display">--</h1>
-            <div class="h-0.5 bg-red-900 w-20 mb-10"></div>
-
-            <div class="space-y-8">
-                <div>
-                    <p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-1">Authenticated Subject</p>
-                    <p id="n" class="text-xl text-zinc-100 font-bold uppercase tracking-tight"></p>
+    <div id="cert-container" class="hidden max-w-sm w-full">
+        <div class="cert-card p-10 rounded-sm border-red-900" id="card">
+            <div class="hologram-shine" id="shine"></div>
+            
+            <div class="flex justify-between items-start mb-10 relative z-10">
+                <div class="text-[8px] text-red-800 font-black leading-tight uppercase">
+                    Adversary Operations<br>Unit: Founders_Gen_1
                 </div>
-                <div>
-                    <p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-1">Operative Callsign</p>
-                    <p id="a" class="text-lg text-red-700 font-bold"></p>
+                <img src="img/logo.png" class="logo-container" id="logo-main" alt="Logo">
+            </div>
+
+            <div class="relative z-10">
+                <h1 class="text-4xl font-black text-red-600 mb-1 tracking-tighter italic uppercase glitch" id="role-display">--</h1>
+                <div class="h-0.5 bg-red-900 w-20 mb-10"></div>
+
+                <div class="space-y-8">
+                    <div>
+                        <p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-1">Authenticated Subject</p>
+                        <p id="n" class="text-xl text-zinc-100 font-bold uppercase tracking-tight"></p>
+                    </div>
+                    <div>
+                        <p class="text-[8px] text-zinc-600 uppercase tracking-widest mb-1">Operative Callsign</p>
+                        <p id="a" class="text-lg text-red-700 font-bold"></p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="mt-20 pt-4 border-t border-zinc-900 text-[8px] text-zinc-800 flex justify-between relative z-10 font-bold">
-            <span id="s"></span>
-            <span>SEC_CLEARANCE: FOUNDER_LVL</span>
+            <div class="mt-20 pt-4 border-t border-zinc-900 text-[8px] text-zinc-800 flex justify-between relative z-10 font-bold">
+                <span id="s"></span>
+                <span>SEC_CLEARANCE: FOUNDER_LVL</span>
+            </div>
         </div>
     </div>
 
     <script>
-        // Función crítica para manejar UTF-8 (ñ, tildes) en Base64
+        // Decodificación UTF-8 nativa (ñ, tildes)
         function b64DecodeUnicode(str) {
             return decodeURIComponent(atob(str).split('').map(function(c) {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
         }
 
+        // Data Registry con Tokens de Integridad
         const _DB = {
             "001": ["Rk9VTkRFUg==","QWxlamFuZHJvIEdvbnphbGV6","QWxleA==","MDAxLzAwOQ==","e9671d18f"],
             "002": ["Rk9VTkRFUg==","TWlndWVsIMOBbmdlbCBBYmFk","dGhlbWlr","MDAyLzAwOQ==","f1a2b3c4d"],
-            "003": ["Rk9VTkRFUg==","Sm9zw6kgTWFudWVsIE5 Michael"},{"u": "w7FleiIsImVsaGFja2VyZXRpY28iLCIwMDMvMDA5IiwiYThiOWMwZMWlIl19","003":["Rk9VTkRFUg==","Sm9zw6kgTWFudWVsIE5 Michael"},{"u":"w7FleiIsImVsaGFja2VyZXRpY28iLCIwMDMvMDA5IiwiYThiOWMwZMWlIl19","003":["Rk9VTkRFUg==","Sm9zw6kgTWFudWVsIE5 Michael"},{"u":"w7FleiIsImVsaGFja2VyZXRpY28iLCIwMDMvMDA5IiwiYThiOWMwZMWlIl19","003":["Rk9VTkRFUg==","Sm9zw6kgTWFudWVsIE5 Michael"},{"u":"w7FleiIsImVsaGFja2VyZXRpY28iLCIwMDMvMDA5IiwiYThiOWMwZMWlIl19","003":["Rk9VTkRFUg==","Sm9zw6kgTWFudWVsIE5 Michael"},{"u":"w7FleiIsImVsaGFja2VyZXRpY28iLCIwMDMvMDA5IiwiYThiOWMwZMWlIl19","003":["Rk9VTkRFUg==","Sm9zw6kgTWFudWVsIE51w7Fleg==","ZWxoYWNrZXJldGljbw==","MDAzLzAwOQ==","a8b9c0d1e"],
+            "003": ["Rk9VTkRFUg==","Sm9zw6kgTWFudWVsIE51w7Fleg==","ZWxoYWNrZXJldGljbw==","MDAzLzAwOQ==","a8b9c0d1e"],
             "004": ["Rk9VTkRFUg==","TWVyY2VkZXMgTXXDsW96","TQ==","MDA0LzAwOQ==","b2c3d4e5f"],
             "005": ["Rk9VTkRFUg==","SXNpcyBBbGJpb2w=","djNyZHVyNHM=","MDA1LzAwOQ==","c3d4e5f6a"],
-            "006": ["Rk9VTkRFUg==","WHVxaWFuZyBsaXUteHU=","RWxhZHk=","MDA2LzAwOQ==","d0e5f6a7b"],
+            "006": ["Rk9VTkRFUg==","WHVxaWFuZyBsaXUteHU=","RWxhZHk=","MDA6LzAwOQ==","d0e5f6a7b"],
             "007": ["TUVNQkVS","QmVhdHJpeiBGcmVzbm8=","Q1ZFYQ==","MDA3LzAwOQ==","e5f6a7b8c"],
             "008": ["TUVNQkVS","UmFxdWVsIEdhbHZleA==","RGVhZHBvb2w=","MDA4LzAwOQ==","f6a7b8c9d"],
             "009": ["TUVNQkVS","RmFiaWFuIERlbGdhZG8=","RWxCZWNhcmlv","MDA5LzAwOQ==","a7b8c9d0e"]
@@ -78,24 +110,56 @@
             setTimeout(() => {
                 document.getElementById('loading').style.display='none';
                 
+                // Validación estricta del token sig
                 if(_DB[id] && _DB[id][4] === sig) {
                     const data = _DB[id];
                     document.getElementById('role-display').innerText = b64DecodeUnicode(data[0]);
                     document.getElementById('n').innerText = b64DecodeUnicode(data[1]);
                     document.getElementById('a').innerText = `[ ${b64DecodeUnicode(data[2])} ]`;
                     document.getElementById('s').innerText = `SERIAL_REF: ${data[3]}`;
-                    document.getElementById('cert').style.display = 'block';
+                    
+                    document.getElementById('cert-container').classList.remove('hidden');
+                    document.getElementById('card').style.display = 'block';
                 } else {
-                    document.body.innerHTML = "<div class='p-10 text-red-600 font-bold text-[10px] tracking-widest'>ACCESS_DENIED: AUTH_TOKEN_MISMATCH</div>";
+                    document.body.innerHTML = "<div class='p-10 text-red-600 font-bold text-[10px] tracking-widest'>ACCESS_DENIED: AUTH_TOKEN_MISMATCH<br><span class='text-[7px] text-zinc-800'>gDversary_Ops</span></div>";
                 }
             }, 1200);
         };
 
-        // Interaction Handler
+        // --- MANEJADORES DE EFECTOS VISUALES (Movimiento y Brillo) ---
+        const card = document.getElementById('card');
+        const shine = document.getElementById('shine');
+
+        const updateVisuals = (x, y) => {
+            // 1. Rotación 3D de la tarjeta (Perspectiva)
+            // Calculamos un valor entre -10 y 10 grados para X e Y
+            const rotateX = (50 - y) / 10;
+            const rotateY = (x - 50) / 10;
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+            // 2. Movimiento del brillo holográfico (Glossy Effect)
+            // Desplazamos la posición del gradiente en base al cursor
+            shine.style.backgroundPosition = `${x / 2}% ${y / 2}%`;
+        };
+
+        // Evento para escritorio (Ratón)
         window.addEventListener('mousemove', (e) => {
+            // Obtenemos porcentaje del cursor en la ventana (0-100)
             const x = (e.clientX / window.innerWidth) * 100;
             const y = (e.clientY / window.innerHeight) * 100;
-            document.getElementById('cert').style.transform = `perspective(1000px) rotateY(${(x-50)/25}deg) rotateX(${(50-y)/25}deg)`;
+            updateVisuals(x, y);
+        });
+
+        // Evento para móvil (Giroscopio/Acelerómetro)
+        window.addEventListener('deviceorientation', (e) => {
+            if (!e.gamma || !e.beta) return; // Evitar errores si no hay sensor
+
+            // gamma: inclinación izquierda/derecha (-90 a 90) -> Mapeamos a X (0 a 100)
+            // beta: inclinación adelante/atrás (-180 a 180) -> Mapeamos a Y (0 a 100)
+            const x = (e.gamma + 90) * (100 / 180);
+            const y = (e.beta + 90) * (100 / 180); // Rango simplificado
+            
+            updateVisuals(x, y);
         });
     </script>
 </body>
